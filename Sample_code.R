@@ -1,4 +1,3 @@
-setwd("/Users/ruixuanwang/Documents/UMich/Project")
 source("run_integrations.R")
 source("infcts.condlogistic.R")
 
