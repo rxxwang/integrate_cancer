@@ -424,7 +424,7 @@ joint.fitting = function(datasets, fit.weighted = fit.weighted.condlogistic,
                          loocv.weighted = loocv.weighted.condlogistic, 
                          test.coefs = test.coefs.condlogistic, 
                          method = "testingopt", trace = F) {
-  print(Sys.time())
+  #print(Sys.time())
   K = length(datasets)
   best.weights = rep(0, K-1) #initialize weights as a vector of 0s
   
@@ -454,7 +454,7 @@ joint.fitting = function(datasets, fit.weighted = fit.weighted.condlogistic,
       #                  method = "L-BFGS-B", lower = c(0, 0), upper = c(1, 1), control = list(fnscale = -1))
     }
     testingopt = opt$par
-    print(opt)
+    #print(opt)
     
     for(i in 1:(length(best.weights))){#convert p-values to weights
       
@@ -480,26 +480,5 @@ joint.fitting = function(datasets, fit.weighted = fit.weighted.condlogistic,
                  #par.localonly = fit.weighted(rep(0, K-1), datasets), 
                  opt = opt,
                  loocv = loocv))
-    
   }
-}
-
-permute.data.condlogistic = function(datasets, num.covars){
-  datasets.permuted = datasets
-  
-  for(i in 1:length(datasets.permuted)){
-    data.hold = data.frame(cbind(datasets.permuted[[i]]$x, 
-                                 datasets.permuted[[i]]$y, datasets.permuted[[i]]$strata))
-    
-    colnames(data.hold)[c(num.covars + 1, num.covars + 2)] = c("Case", "MatchID")
-    
-    flip.sample = as.list(sample(c(0:1), size = nrow(data.hold)/2, replace = T))
-    flip.sample = unlist(lapply(flip.sample, function(x) if (x == 1) c(-1, 1) else c(0, 0)))
-    
-    data.hold$Case = data.hold$Case + flip.sample
-    data.hold = data.hold[with(data.hold, order(MatchID, -Case)),]
-    
-    datasets.permuted[[i]]$x = unname(as.matrix(data.hold[, 1:num.covars, drop = F]))
-  }
-  return(datasets.permuted)
 }
