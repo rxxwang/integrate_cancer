@@ -13,17 +13,17 @@ cancer_name = c("Bladder", "Brain", "Breast", "Esoph", "HN",
 # Generate sample data
 n <- 2*sample(1:1000, 14)  # Number of observations for each cancer
 df1 <- data.frame(
-  x = rep(0:1, sum(n)),
-  y = sample(0:1, sum(n), replace = T),
-  strata = rep(1:(sum(n)/2), each = 2),
-  cancer = rep(cancer_name, n)
+  x = sample(0:1, sum(n), replace = T),  # Genotype
+  y = rep(0:1, sum(n)),  # Case-control status
+  strata = rep(1:(sum(n)/2), each = 2),  # paired numbers of case and control
+  cancer = rep(cancer_name, n)  # cancer name (local or external dataset)
 )
 
 df2 <- data.frame(
-  x = rep(0:1, sum(n)),
-  y = rbinom(sum(n), 1, prob = 0.4 + 0.2 * rep(0:1, sum(n))),
-  strata = rep(1:(sum(n)/2), each = 2),
-  cancer = rep(cancer_name, n)
+  x = rbinom(sum(n), 1, prob = 0.4 + 0.2 * rep(0:1, sum(n))),  # Generate genotype that is related with case-control status
+  y = rep(0:1, sum(n)),  # Case-control status
+  strata = rep(1:(sum(n)/2), each = 2),  # paired numbers of case and control
+  cancer = rep(cancer_name, n)  # cancer name (local or external dataset)
 )
 
 result1 = run_integrations(df1, "Breast", F)
