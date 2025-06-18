@@ -2,30 +2,38 @@ run_integrations = function(data, local, permuted) {
   cancer = sort(unique(data$cancer))
   local_num = which(cancer == local)
   
+  cancer_name = c("Bladder", "Brain", "Breast", "Esoph", "HN",
+                  "Kidney", "Leukemia", "Liver", "Lung", "Ovarian",
+                  "Panc", "Prostate", "Sarcoma", "Stomach")
+  
   # Randomly swap the case-control label
   if(permuted){
-    for (j in unique(data$strata)){
-      u = runif(1)
-      if(u > 0.5){
-        cc = data$x[data$strata == j]
-        data$x[data$strata == j] = rev(cc)  
-      }
-    } 
+    data = data %>%
+      group_by(strata) %>%
+      mutate(
+        swap = rbinom(1, 1, 0.5),    # For each MatchID, decide swap (0 = no swap, 1 = swap)
+        y = ifelse(swap == 1, 1 - y, y)  # If swap == 1, flip 0 to 1 and 1 to 0
+      ) %>%
+      dplyr::select(-swap)
   }
-  
-  if (!(local %in% cancer)) {
+  data = data %>% arrange(strata, desc(y))
+  if (!(local %in% cancer_name)) {
     stop("Not a valid Cancer Type - make sure you are using a capital letter to start")
   }
   data_vector = rep(0, 6)
   
   #re-arrange the datasets
   datasets <- split(data[, c("x", "y", "strata")], data$cancer)
-  names(datasets) <- unique(data$cancer)
-  datasets <- datasets[order(names(datasets))]
+  names(datasets) <- cancer_name
+  #datasets <- datasets[order(names(datasets))]
   datasets = c(datasets[local_num], datasets[-local_num])
   datasets <- lapply(datasets, function(sublist) {
     sublist$x <- matrix(sublist$x, ncol = 1)  # Converting to a column matrix
-    return(sublist)
+    return(list(
+      x = sublist$x,
+      y = sublist$y,
+      strata = sublist$strata
+    ))
   })
     
   result <- tryCatch({
